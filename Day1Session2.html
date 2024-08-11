@@ -480,11 +480,18 @@ tab-delimited, etc.). <code>read.csv()</code> is a special case of
 <pre class="r"><code># Basic CSV read: Import data with header row, values separated by &quot;,&quot;, decimals as &quot;.&quot;
 data &lt;- read.csv(file = &quot; &quot;)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
+<p>You can also use <code>read_csv</code> from <code>readr</code>
+package to load csv file and this function is more efficient
+sometimes.</p>
+<p><span class="math inline">\(~\)</span></p>
+<pre class="r"><code>data &lt;- read_csv(&quot; &quot;)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
 </div>
 <div id="reading-excel-files" class="section level4">
 <h4>Reading Excel Files</h4>
 <p><span class="math inline">\(~\)</span></p>
-<p>Don’t use Microsoft Excel files (.xls or .xlsx). But if you must:</p>
+<p>Usually we don’t use Microsoft Excel files (.xls or .xlsx). But if
+you must:</p>
 <p><span class="math inline">\(~\)</span></p>
 <pre class="r"><code># Make sure you have installed the tidyverse suite (only necessary one time)
 # install.packages(&quot;tidyverse&quot;) # Not Run
@@ -495,23 +502,11 @@ library(readxl)</code></pre>
 <p>Then, <code>read_excel()</code> reads both <code>xls</code> and
 <code>xlsx</code> files and detects the format from the extension.</p>
 <p><span class="math inline">\(~\)</span></p>
-<pre class="r"><code># For example
-data &lt;- read_excel(path = &quot;data/airline_small.xlsx&quot;, sheet = 1)</code></pre>
+<pre class="r"><code># Choose sheet 1 and skip the first row
+data &lt;- read_excel(path = &quot;data/gender_datasheets.xlsx&quot;, sheet = 1, skip = 1)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
 <p>But you can always transform an Excel file into a <code>.csv</code>
 file in Microsoft Excel, in order to be easily read in R.</p>
-<p><span class="math inline">\(~\)</span></p>
-</div>
-<div id="reading-stata-.dta-files" class="section level4">
-<h4>Reading Stata (.dta) Files</h4>
-<p><span class="math inline">\(~\)</span></p>
-<p>Since STATA files are used widely in social sciences, it is very
-essential to know how to read a <code>.dta</code> file. There are many
-ways to do that in R. I recommend using the package of
-<code>haven</code>.</p>
-<p><span class="math inline">\(~\)</span></p>
-<pre class="r"><code>library(haven)
-ANESraw &lt;- read_dta(&quot;/Users/ShuFu/Desktop/SSI_II_2023/ANES2020/anes_timeseries_2020_stata_20220210.dta&quot;) </code></pre>
 <p><span class="math inline">\(~\)</span></p>
 </div>
 <div id="take-a-view-of-the-data" class="section level4">
@@ -530,9 +525,9 @@ window on the right-up side, which is equivalent to
 <div id="challenge" class="section level4">
 <h4>Challenge</h4>
 <p><span class="math inline">\(~\)</span></p>
-<p>Let’s open up a new R script and read the 2020 ANES dataset,
-<code>anes_timeseries_2020_stata_20220210.dta</code>, in R, and take a
-view of that data.</p>
+<p>Let’s open up a new R script and read the <code>table5_b</code> from
+<code>gender_datasheets.xlsx</code> in R, and take a view of that
+data.</p>
 <p><span class="math inline">\(~\)</span></p>
 </div>
 </div>
@@ -552,13 +547,13 @@ objects into an <code>.RData</code> object.</p>
 <h4>Writing a <code>.csv</code> Spreadsheet</h4>
 <p><span class="math inline">\(~\)</span></p>
 <p>To export an individual dataframe as a spreadsheet, use
-<code>write.csv()</code></p>
+<code>write_csv()</code></p>
 <p><span class="math inline">\(~\)</span></p>
 <pre class="r"><code># Basic call
-write.csv(x = , file = , row.names = , col.names =)</code></pre>
+write_csv(x = , file = &quot; &quot;)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
-<p>Let’s write the ANESraw dataset, which is stored in our R memory, as
-a <code>.csv</code>.</p>
+<p>(NEED REVISION) Let’s write the ANESraw dataset, which is stored in
+our R memory, as a <code>.csv</code>.</p>
 <p><span class="math inline">\(~\)</span></p>
 <pre class="r"><code># Typically, we add an argument &quot;row.names = FALSE&quot;
 # Or it will create an unnecessary column with row names 1,2,3,...
@@ -1147,11 +1142,305 @@ format.</p>
 </div>
 </div>
 </div>
-<div id="relational-data-to-be-added---shu" class="section level2">
-<h2>7. Relational Data (TO BE ADDED - SHU)</h2>
+<div id="relational-data" class="section level2">
+<h2>7. Relational Data</h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>It’s rare that data analysis involves only a single table of data.
+And it’s often need to add control variables to your main data. So
+typically, you have many tables of data, and you must combine them to
+answer the questions that you’re interested in. Collectively, multiple
+tables of data are called relational data because it is the relations,
+not just the individual datasets, that are important.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>Note that when we say relational database here, we are referring to
+how the data are structured, not to the use of any fancy software.</p>
+<p><span class="math inline">\(~\)</span></p>
+<div id="why-relational-data" class="section level3">
+<h3>7.2 Why Relational Data</h3>
+<p><span class="math inline">\(~\)</span></p>
+<p>As social scientists, we are usually working with data across
+different <strong>level of analysis</strong>. The main principle of
+relational data is that each table is structured around the same
+observational unit.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>Why is this important? Check out the following data.</p>
+<p><span class="math inline">\(~\)</span></p>
+<pre class="r"><code>messy &lt;- data.frame(
+  county = c(36037, 36038, 36039, 36040, NA , 37001, 37002, 37003, 11001),
+  state = c(&quot;NY&quot;, &quot;NY&quot;, &quot;NY&quot;, NA, NA, &quot;VA&quot;, &quot;VA&quot;, &quot;VA&quot;, &quot;DC&quot;),
+  county_pop = c(3817735, 422999, 324920, 143432, NA, 3228290, 449499, 383888, 689545),
+  state_pop = c(43320903, 43320903, NA, 43320903, 43320903, 7173000, 7173000, 7173000, 689545),
+  region = c(1, 1, 1, 1, 1, 3, 3, 3, 3)
+)
+
+kable(messy)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<p>What a mess! How can the population of the state of New York be 43
+million for one county but “missing” for another? If this is a dataset
+of counties, what does it mean when the “county” field is missing? If
+region is something like Census region, how can two counties in the same
+state be in different regions? And why is it that all the counties whose
+codes start with 36 are in New York except for one, where the state is
+unknown?</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>If we follow the principles of relational data, each type of
+observational unit should form a table.</p>
+<ul>
+<li><p>counties contains data on counties.</p></li>
+<li><p>states contains data on states.</p></li>
+</ul>
+<p>So the ideal data should look like:</p>
+<pre class="r"><code>counties &lt;- data.frame(
+  county = c(36037, 36038, 36039, 36040, 37001, 37002, 37003, 11001),
+  state = c(&quot;NY&quot;, &quot;NY&quot;, &quot;NY&quot;, &quot;NY&quot;, &quot;VA&quot;, &quot;VA&quot;, &quot;VA&quot;, &quot;DC&quot;),
+  county_pop = c(3817735, 422999, 324920, 143432, 3228290, 449499, 383888, 689545), stringsAsFactors = F
+)
+
+kable(counties)
+
+states &lt;- data.frame(
+  state = c(&quot;NY&quot;, &quot;VA&quot;, &quot;DC&quot;),
+  state_pop = c(43320903, 7173000, 689545),
+  region = c(1, 3, 3), stringsAsFactors = F
+)
+
+kable(states)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<p>County population is a property of a county, so it lives in the
+county table. State population is a property of a state, so it cannot
+live in the county table. If we had panel data on counties, we would
+need separate tables for things that vary at the county level (like
+state) and things that vary at the county-year level (like
+population).</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>Now the ambiguity is gone. Every county has a population and a state.
+Every state has a population and a region. There are no missing states,
+no missing counties, and no conflicting definitions. The database is
+self-documenting.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>What if, for some research purpose, we just need to merge these two
+data together, how to achieve that?</p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
+</div>
+<div id="keys" class="section level2">
+<h2>7.3 Keys</h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>The variables used to connect each pair of tables are called
+<strong>keys</strong>. A key is a variable (or set of variables) that
+uniquely identifies an observation. Also called a unique
+<em>identifier</em>.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>In simple cases, a single variable is sufficient to identify an
+observation. In the example above, each county is identified with county
+(a numeric identifier); each state is identified with state (a
+two-letter character).</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>There are two types of keys:</p>
+<p><span class="math inline">\(~\)</span></p>
+<ul>
+<li><p>A <strong>primary key</strong> uniquely identifies an observation
+in the primary table. For example, <code>counties$state</code> is a
+primary key because it uniquely identifies the state of each county in
+the <code>counties</code> table.</p></li>
+<li><p>A <strong>foreign key</strong> uniquely identifies an observation
+in another table. For example, the <code>states$state</code> is a
+foreign key to the <code>counties</code> table because it appears in the
+<code>states</code> table which will be matched to the
+<code>states</code> variable in the <code>counties</code>
+table.</p></li>
+</ul>
+<p><span class="math inline">\(~\)</span></p>
+<p>A primary key and the corresponding foreign key in another table form
+a <strong>relation</strong>.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>Sometimes a table does not have an explicit primary key: each row is
+an observation, but it lacks a variable that reliably identifies it. If
+a table lacks a primary key, it is useful to add one with
+<code>mutate()</code>.</p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
+<div id="joins" class="section level2">
+<h2>7.4 Joins</h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>At some point, we are going to have to <strong>merge</strong> (or
+<strong>join</strong>) the tables together to produce a single
+dataframe, and conduct analysis on that dataframe.</p>
+<p>Let’s say we wanted to merge tables <code>x</code> and
+<code>y</code>. A <strong>join</strong> allows you to combine varaibles
+from the two tables. It first matches observations by their keys, then
+copies across variables from one table to the other.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>There are four join options. If our primary table is <code>x</code>,
+and additional table is <code>y</code>.</p>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>A <code>left_join</code> keeps all observations in
+<code>x</code>,</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: decimal">
+<li>A <code>right_join</code> keeps all observations in
+<code>y</code>,</li>
+</ol></li>
+<li><ol start="3" style="list-style-type: decimal">
+<li>An <code>inner_join</code> keeps observations that appear in both
+tables <code>x</code> and <code>y</code>,</li>
+</ol></li>
+<li><ol start="4" style="list-style-type: decimal">
+<li>A <code>full_join</code> keeps all observations in <code>x</code>
+and all observations in <code>y</code>.</li>
+</ol></li>
+</ul>
+<p><span class="math inline">\(~\)</span></p>
+<p>The most commonly used join is the <code>left_join()</code>: you use
+this whenever you look up additional data from another table, because it
+preserves the original observations even when there isn’t a match. For
+example, a <code>left_join()</code> on <code>x</code> and <code>y</code>
+pulls in variables form <code>y</code> while preserving all the
+observations on <code>x</code>.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>Let’s say we want to combine the <code>counties</code> and
+<code>states</code> tables we created earlier.</p>
+<p><span class="math inline">\(~\)</span></p>
+<pre class="r"><code>counties_states &lt;- counties %&gt;%
+  left_join(states, by = &quot;state&quot;)
+
+kable(counties_states)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<p>Notice there are two new columns: <code>state_pop</code> and
+<code>region</code>.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>The left join should be your default join: use it unless you have a
+strong reason to prefer one of the others.</p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
+<div id="defining-keys" class="section level2">
+<h2>7.5 Defining Keys</h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>In the example above, the two tables were joined by a single
+variable, and that variable has the <strong>same name</strong> and the
+<strong>same type</strong> in both tables. That constraint was encoded
+by <code>by = &quot;key&quot;</code>.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p>You can use other values for <code>by</code> to connect the tables in
+other ways:</p>
+<p><span class="math inline">\(~\)</span></p>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>The default, <code>by = NULL</code>, or just leaving the
+<code>by</code> argument out, uses all variables that appear in both
+tables. And R will return a message on which variable(s) is merged
+by.</li>
+</ol></li>
+</ul>
+<p><span class="math inline">\(~\)</span></p>
+<pre class="r"><code>counties_states &lt;- counties %&gt;%
+  left_join(states)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<ul>
+<li><ol start="2" style="list-style-type: decimal">
+<li>A character vector, <code>by = c(&quot;var1&quot;, &quot;var2&quot;)</code>. This sets
+the common variables for the joining.</li>
+</ol></li>
+</ul>
+<p><span class="math inline">\(~\)</span></p>
+<ul>
+<li><ol start="3" style="list-style-type: decimal">
+<li>A named character vector: <code>by = c(&quot;a&quot; = &quot;b&quot;)</code>. This will
+match variable <code>a</code> in table <code>x</code> to variable
+<code>b</code> in table <code>y</code>. The variables <code>a</code>
+from <code>x</code> will be used in the output.</li>
+</ol></li>
+</ul>
+<p><span class="math inline">\(~\)</span></p>
+<pre class="r"><code>states_2 &lt;- data.frame(
+  stab = c(&quot;NY&quot;, &quot;VA&quot;),
+  state_pop = c(43320903, 7173000),
+  region = c(1, 3), stringsAsFactors = F
+)
+
+counties_states_2 &lt;- counties %&gt;%
+  left_join(states_2, by = c(&quot;state&quot; = &quot;stab&quot;))
+
+kable(counties_states_2)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<p>Notice that we see NA in the last row because the
+<code>state_2</code> dataset does not contain observations for DC. But
+since we used left_join(), all observations in <code>counties</code>
+were preserved.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p><strong>PAY ATTENTION</strong>: It is <strong>very important</strong>
+to check the missing values by peaking at the bottom of the dataset. Or
+use <code>table()</code> function with <code>exclude = F</code> to check
+the missing values for a specific variable.</p>
+<pre class="r"><code>tail(counties_states_2)
+
+table(counties_states_2$state_pop, exclude = F)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<p><strong>PAY ATTENTION</strong>: Sometimes, even the names of the
+<em>key</em> variable are the same in two tables, their variable
+<strong>types</strong> are usually not the same. Then we have to check
+their types, by <code>str()</code> or <code>class()</code>, and coerse
+them to be the same type, by <code>as.numeric()</code> or
+<code>as.character()</code>, etc. This is very common in our day-to-day
+data analysis.</p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
+<div id="practise-with-superheroes-and-publishers" class="section level2">
+<h2>7.6 Practise with <code>superheroes</code> and
+<code>publishers</code></h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>Let’s practise how these different types of joining operations work
+with relational data on <em>comic books</em>. There are two data frames
+which contain data on comic books.</p>
+<pre class="r"><code>superheroes &lt;- data.frame(
+  name = c(&quot;Magneto&quot;, &quot;Storm&quot;, &quot;Mystique&quot;, &quot;Batman&quot;, &quot;Joker&quot;, &quot;Catwoman&quot;, &quot;Sabrina&quot;),
+  alignment = c(&quot;bad&quot;, &quot;good&quot;, &quot;bad&quot;, &quot;good&quot;, &quot;bad&quot;, &quot;bad&quot;, &quot;good&quot;),
+  gender = c(&quot;male&quot;, &quot;female&quot;, &quot;female&quot;, &quot;male&quot;, &quot;male&quot;, &quot;female&quot;, &quot;female&quot;),
+  publisher = c(&quot;Marvel&quot;, &quot;Marvel&quot;, &quot;Marvel&quot;, &quot;DC&quot;, &quot;DC&quot;, &quot;DC&quot;, &quot;Archie Comics&quot;),
+  stringsAsFactors = F
+)
+
+publishers &lt;- data.frame(
+  publisher = c(&quot;DC&quot;, &quot;Marvel&quot;, &quot;Image&quot;),
+  yr_founded = c(1934, 1939, 1992),
+  stringsAsFactors = F
+)
+
+superheroes
+publishers</code></pre>
+<p>Each data frame contains substantively different information:</p>
+<ul>
+<li><code>superheroes</code> contains data on superheroes.</li>
+<li><code>publishers</code> contains data on publishers.</li>
+</ul>
+<p>The units of analysis are completely different. But depending on the
+type of analysis you seek to perform, it makes sense to join the data
+frames together temporarily.</p>
+<p><span class="math inline">\(~\)</span></p>
+<div id="i.-left-join-merge-in-the-publisher-information-to-the-superheroes-data.-what-do-you-find" class="section level4">
+<h4>i. Left Join: merge in the publisher information to the
+<code>superheroes</code> data. What do you find?</h4>
+<p><span class="math inline">\(~\)</span></p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
+<div id="ii.-conduct-a-right-join.-what-do-you-find" class="section level4">
+<h4>ii. Conduct a Right Join. What do you find?</h4>
+<p><span class="math inline">\(~\)</span></p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
+<div id="iii.-try-inner-join-this-time.-which-observations-are-left" class="section level4">
+<h4>iii. Try Inner Join this time. Which observations are left?</h4>
+<p><span class="math inline">\(~\)</span></p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
+<div id="iv.-finally-perform-a-full-join." class="section level4">
+<h4>iv. Finally, perform a full join.</h4>
 <p><span class="math inline">\(~\)</span></p>
 <p><span class="math inline">\(~\)</span></p>
 <p><span class="math inline">\(~\)</span></p>
+<p><span class="math inline">\(~\)</span></p>
+</div>
 <div id="acknowledgements" class="section level3">
 <h3>Acknowledgements</h3>
 <p>This page is, in part, derived from the following sources:</p>
