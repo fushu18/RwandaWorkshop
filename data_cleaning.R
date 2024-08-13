@@ -34,7 +34,7 @@ planets[4, ] # Print out data for Mars (entire fourth row)
 planets[1:3, 1:2] # Print first three rows of the first two columns
 
 ## Subsetting with $
-planets$rings $ Print out variable of rings
+planets$rings # Print out variable of rings
 
 ## Conditional Subsetting
 diameter_ratio <- planets$diameter_ratio
